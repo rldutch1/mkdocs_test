@@ -388,6 +388,10 @@
     </li>
     <li class="toctree-l3"><a class="reference internal" href="#select-blobdata">Select Blobdata:</a>
     </li>
+    <li class="toctree-l3"><a class="reference internal" href="#select-current-user">Select current user:</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#select-data-from-the-commandline">Select data from the commandline:</a>
+    </li>
     <li class="toctree-l3"><a class="reference internal" href="#null-and-not-null">Null and Not NULL:</a>
     </li>
         </ul>
@@ -1992,6 +1996,13 @@ mysql -e "DROP DATABASE \`test\`;"
 <h6 id="select-blobdata">Select Blobdata:</h6>
 <pre><code>    SELECT SUBSTRING(&lt;BLOB COLUMN_NAME&gt;,1,2500) FROM &lt;Table_name&gt;;
 </code></pre>
+<h6 id="select-current-user">Select current user:</h6>
+<pre><code>    SELECT current_user();
+</code></pre>
+<h6 id="select-data-from-the-commandline">Select data from the commandline:</h6>
+<pre><code>    mysql -uusername -p -e"select current_user();"
+    mysql -uusername -p -e"select user from mysql.user;"
+</code></pre>
 <h6 id="null-and-not-null">Null and Not NULL:</h6>
 <pre><code>Show what IS NOT NULL:
 SELECT *
@@ -2028,6 +2039,9 @@ http://stackoverflow.com/questions/5285448/mysql-select-only-not-null-values
 </code></pre>
 <pre><code>    To show database file location:
         show variables where Variable_name like '%datadir%';
+</code></pre>
+<pre><code>    To show grants for a particular user:
+        show grants for root@localhost
 </code></pre>
 <h4 id="service-mysql">Service (MySQL):</h4>
 <h6 id="linux-andor-mac">Linux and/or MAC:</h6>

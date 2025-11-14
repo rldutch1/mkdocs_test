@@ -151,6 +151,26 @@
                 <li class="toctree-l1 current"><a class="reference internal current" href="#">SSH</a>
     <ul class="current">
     <li class="toctree-l2"><a class="reference internal" href="#ssh-broadcast-message-the-system-will-suspend-now-client_loop-send-disconnect-broken-pipe">SSH: Broadcast message: The system will suspend now! client_loop: send disconnect: Broken pipe</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#you-can-display-the-current-sleepsuspend-settings-with-a-command-like-this-one">You can display the current sleep/suspend settings with a command like this one:</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#the-problem-of-getting-kicked-out-of-the-remote-computer-when-the-computer-goes-into-hybernate-mode-was-solved-with-the-following">The problem of getting kicked out of the remote computer when the computer goes into hybernate mode was solved with the following:</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#ssh-port-forwarding">SSH Port Forwarding</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#local-port-forwarding">Local port forwarding:</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#remote-port-forwarding">Remote port forwarding:</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#run-a-command-on-a-remote-computer-using-ssh">Run a command on a remote computer using SSH:</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#compress-and-send-a-file-from-your-local-computer-to-a-remote-computer-using-ssh">Compress and send a file from your local computer to a remote computer using SSH:</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#offending-ecdsa-key-in-homerobsshknown_hostsxxx">Offending ECDSA key in /home/rob/.ssh/known_hosts:XXX</a>
     </li>
     </ul>
                 </li>
@@ -207,13 +227,42 @@
   Remove with:<br />
   <span style="color: #3366ff;">ssh-keygen -f "/home/someuser/.ssh/known_hosts" -R "theservername.com"</span><br /></p>
 <p>Copy SSH public key to remote computer:
-  <span style="color: #3366ff;">ssh-copy-id -i ~/.ssh/id_rsa.pub user@hostname</span><br /></p>
-<h4 id="ssh-broadcast-message-the-system-will-suspend-now-client_loop-send-disconnect-broken-pipe">SSH: Broadcast message: The system will suspend now! client_loop: send disconnect: Broken pipe</h4>
-<p>You can display the current sleep/suspend settings with a command like this one:</p>
+  <br />
+  <span style="color: #3366ff;">ssh-copy-id -i ~/.ssh/id_rsa.pub user@hostname</span>
+  <br />
+  <span style="color: #3366ff;">cat .ssh/id_rsa.pub | ssh username@servername.com "cat &gt; .ssh/authorized_keys"</p>
+<h2 id="ssh-broadcast-message-the-system-will-suspend-now-client_loop-send-disconnect-broken-pipe">SSH: Broadcast message: The system will suspend now! client_loop: send disconnect: Broken pipe</h2>
+<h3 id="you-can-display-the-current-sleepsuspend-settings-with-a-command-like-this-one">You can display the current sleep/suspend settings with a command like this one:</h3>
 <p><span style="color: #3366ff;">sudo -u gdm dbus-run-session gsettings list-recursively org.gnome.settings-daemon.plugins.power | grep sleep</span><br /></p>
-<p>The problem of getting kicked out of the remote computer when the computer goes into hybernate mode was solved with the following:<br />
-<span style="color: #3366ff;">systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target</span><br />
+<h3 id="the-problem-of-getting-kicked-out-of-the-remote-computer-when-the-computer-goes-into-hybernate-mode-was-solved-with-the-following">The problem of getting kicked out of the remote computer when the computer goes into hybernate mode was solved with the following:<br /></h3>
+<p><span style="color: #3366ff;">systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target</span><br />
 <a href="https://pagure.io/fedora-workstation/issue/360">Source:</a><br /></p>
+<h2 id="ssh-port-forwarding">SSH Port Forwarding</h2>
+<h3 id="local-port-forwarding">Local port forwarding:</h3>
+<p>To access a web server running on port 80 on a remote server (accessible from ssh_server) from your local machine on port 8080.
+Example: The url https://localhost:8080 on your local computer will be forwarded to port 80 on the remote server.
+  <br />
+  <span style="color: #3366ff;">ssh -L 8080:localhost:80 user@ssh_server</span></p>
+<h3 id="remote-port-forwarding">Remote port forwarding:</h3>
+<p>Using -R forwards a port on the remote server to a port on your local machine, or to a port on another machine accessible from your local machine.
+Example: The url https://destination_host:3333 will get forwarded to 1234 on my computer or some other computer accessible from my computer.
+  <br />
+  <span style="color: #3366ff;">ssh -R remote_port:destination_host:destination_port user@ssh_server</span>
+  <br />
+  <span style="color: #3366ff;">ssh -R 3333:destination_host:1234 user@ssh_server</span></p>
+<h2 id="run-a-command-on-a-remote-computer-using-ssh">Run a command on a remote computer using SSH:</h2>
+<p><span style="color: #3366ff;">ssh username@servername.com "ls -al"</span></p>
+<h2 id="compress-and-send-a-file-from-your-local-computer-to-a-remote-computer-using-ssh">Compress and send a file from your local computer to a remote computer using SSH:</h2>
+<p><span style="color: #3366ff;">tar zcvf - TheLocalFile.txt | ssh username@servername.com "cat &gt; SomeRemoteFilename.txt"</span></p>
+<h2 id="offending-ecdsa-key-in-homerobsshknown_hostsxxx">Offending ECDSA key in /home/rob/.ssh/known_hosts:XXX</h2>
+<p>Remove with
+  <br />
+    <span style="color: #3366ff;">ssh-keygen -f "/home/username/.ssh/known_hosts" -R "TheHostName.com"</span>
+  <br />
+Example:
+  <br />
+    <span style="color: #3366ff;">ssh-keygen -f "/home/username/.ssh/known_hosts" -R "192.168.1.1"</span>
+  <br /></p>
               
             </div>
           </div><footer>

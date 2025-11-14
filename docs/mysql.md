@@ -1580,6 +1580,13 @@ Change the default mysql> prompt to something functional and useful.
 ###### Select Blobdata:
 		SELECT SUBSTRING(<BLOB COLUMN_NAME>,1,2500) FROM <Table_name>;
 
+###### Select current user:
+		SELECT current_user();
+
+###### Select data from the commandline:
+		mysql -uusername -p -e"select current_user();"
+		mysql -uusername -p -e"select user from mysql.user;"
+
 ###### Null and Not NULL:
     Show what IS NOT NULL:
     SELECT *
@@ -1624,6 +1631,11 @@ If you want to run shell commands from within the MySQL command prompt use a bac
 ```
 	To show database file location:
 		show variables where Variable_name like '%datadir%';
+```
+
+```
+	To show grants for a particular user:
+		show grants for root@localhost
 ```
 
 #### Service (MySQL):

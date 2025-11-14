@@ -397,4 +397,20 @@ The '-e' option allows you to search for multiple things. It is kind of like an 
 #### Find Graphics or Video Card Information:
 <span style="color: #3366ff;">lspci -k | grep -EA3 'VGA|3D|Display'</span><br />
 
+#### List or rename files that start with a dash (-):
+List all files that start with a dash:
+<span style="color: #3366ff;">ls -al -- -*</span><br />
 
+Rename a file that starts with a dash:
+<span style="color: #3366ff;">mv -- -oldfilename.txt newfilename.txt</span><br />
+
+Create a file that starts with a dash:
+<span style="color: #3366ff;">touch -- -somefile.txt</span><br />
+
+Remove multiple text files that start with a dash (-):
+<span style="color: #3366ff;">rm -f ./-*.txt</span><br />
+
+List all the .txt files that begin with a dash and create a list of them to be renamed:<br />
+<span style="color: #3366ff;">ls -1 |awk {'print "mv -- "$1" "$1'} > rname.sh;chmod +x rname.sh;vi rname.sh</span><br />
+	Open the rname.sh in VI editor and remove the dash, type:<br />
+		<span style="color: #3366ff;">:%s/\.txt\ \-/\.txt\ /g</span><br />
