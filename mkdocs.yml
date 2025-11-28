@@ -8,6 +8,7 @@ nav:
     - Base64: base64.md
     - Bash Stuff: bashstuff.md
     - Blue Parrot: blueparrot.md
+    - Cockpit: cockpit.md
     - Exiftool: exiftool.md
     - Fedora Keyring: fedora_keyring.md
     - FFMEG: ffmpeg.md

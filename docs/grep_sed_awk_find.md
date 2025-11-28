@@ -25,6 +25,9 @@
 ###### Search and replace all the strings/patterns without opening a file.
 	- sed 's/Old/New/' somefile.txt
 
+###### Search and replace all the strings/patterns without opening all files.
+	- sed -i -e 's/Old/New/g' *
+
 ###### Replace only the second occurrence on each line.
 	- sed 's/Old/New/2' somefile.txt
 
