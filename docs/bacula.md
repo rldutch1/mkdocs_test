@@ -107,12 +107,17 @@ Tapes (bconsole commands)
   mount a new volume, you must issue this command after you have placed the new volume in the drive.
   In effect, it is the signal needed by Bacula to know to start reading or writing the new volume.
   <span style="color: #3366ff;">quit</span> - Exit or quit the console program.
+  <span style="color: #3366ff;">reload</span> - Reload changes from the bacula-xx.conf files.
   <span style="color: #3366ff;">status dir</span> - Print a status of all running jobs and jobs scheduled
   in the next 24 hours.
   <span style="color: #3366ff;">status jobid=rn</span> - Print a status of JobId nn if it is running.
   The Storage daemon is contacted and requested to print a current status of the job as well.
   <span style="color: #3366ff;">status</span> - The console program will prompt you to select a daemon
   type, then will request the daemon's status.
+  <span style="color: #3366ff;">show client status</span> - Show the status of clients.
+  <span style="color: #3366ff;">show dir status</span> -
+  <span style="color: #3366ff;">show filesets</span> -
+  <span style="color: #3366ff;">show storage</span> -
   <span style="color: #3366ff;">unmount storage=storage-name</span> - Unmounts the drive associated
   with the storage device with the name storage-name if the drive is not currently being used. This
   command is used if you wish Bacula to free the drive so that you can use it to label a tape.
@@ -278,7 +283,7 @@ Eject the tape.
 				You have messages.
 
 
-```
+
 Troubleshooting
 Erase a label on the tape	<span style="color: #3366ff;">mt rewind && mt weof && mt rewind</span>
 
@@ -291,10 +296,25 @@ Tape-0004 and mount from bconsole.
 
     I think the command "mount storage=LTO-4_SD" would have worked also but I am not sure
     how I would have ejected the full tape out.
-```
+
 </pre>
 <hr />
 Source for some of the data [here:](https://workaround.org/bacula-cheatsheet/)
 <hr />
 <br /> https://www.bacula-web.org/docs/install/selinux/
+
+For Fedora users running SELinux, and using a local path to backup or restore, you will
+have to set the correct SELinux context label:
+To see the current context label for a directory that you plan to use type:<br />
+	<span style="color: #3366ff;">ls -alZ /Full/Path</span>
+
+Delete the current context (can use double-quotes in the full path section):<br />
+	<span style="color: #3366ff;">semanage fcontext -d -t Old_Context_Type '/Full/Path(/.*)?'</span>
+
+Add a new bacula friendly context (can use double-quotes in the full path section):<br />
+<span style="color: #3366ff;">
+semanage fcontext -a -t bacula_store_t '/Full/Path(/.*)?'<br />
+restorecon -R -v /Full/Path</span>
+
+Make sure bacula has ownership of the path <span style="color: #3366ff;">chown -R bacula:bacula /Full/Path</span>
 

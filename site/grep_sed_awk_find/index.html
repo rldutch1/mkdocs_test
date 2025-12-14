@@ -68,6 +68,10 @@
                 </li>
               </ul>
               <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../cockpit/">Cockpit</a>
+                </li>
+              </ul>
+              <ul>
                 <li class="toctree-l1"><a class="reference internal" href="../exiftool/">Exiftool</a>
                 </li>
               </ul>
@@ -117,6 +121,8 @@
     <li class="toctree-l3"><a class="reference internal" href="#add-line-number-for-all-non-empty-lines-in-a-file">Add line number for all non-empty-lines in a file.</a>
     </li>
     <li class="toctree-l3"><a class="reference internal" href="#search-and-replace-all-the-stringspatterns-without-opening-a-file">Search and replace all the strings/patterns without opening a file.</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#search-and-replace-all-the-stringspatterns-without-opening-all-files">Search and replace all the strings/patterns without opening all files.</a>
     </li>
     <li class="toctree-l3"><a class="reference internal" href="#replace-only-the-second-occurrence-on-each-line">Replace only the second occurrence on each line.</a>
     </li>
@@ -287,6 +293,9 @@
 </code></pre>
 <h6 id="search-and-replace-all-the-stringspatterns-without-opening-a-file">Search and replace all the strings/patterns without opening a file.</h6>
 <pre><code>- sed 's/Old/New/' somefile.txt
+</code></pre>
+<h6 id="search-and-replace-all-the-stringspatterns-without-opening-all-files">Search and replace all the strings/patterns without opening all files.</h6>
+<pre><code>- sed -i -e 's/Old/New/g' *
 </code></pre>
 <h6 id="replace-only-the-second-occurrence-on-each-line">Replace only the second occurrence on each line.</h6>
 <pre><code>- sed 's/Old/New/2' somefile.txt

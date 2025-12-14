@@ -70,6 +70,10 @@
                 </li>
               </ul>
               <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../cockpit/">Cockpit</a>
+                </li>
+              </ul>
+              <ul>
                 <li class="toctree-l1"><a class="reference internal" href="../exiftool/">Exiftool</a>
                 </li>
               </ul>
@@ -305,12 +309,17 @@ Tapes (bconsole commands)
   mount a new volume, you must issue this command after you have placed the new volume in the drive.
   In effect, it is the signal needed by Bacula to know to start reading or writing the new volume.
   <span style="color: #3366ff;">quit</span> - Exit or quit the console program.
+  <span style="color: #3366ff;">reload</span> - Reload changes from the bacula-xx.conf files.
   <span style="color: #3366ff;">status dir</span> - Print a status of all running jobs and jobs scheduled
   in the next 24 hours.
   <span style="color: #3366ff;">status jobid=rn</span> - Print a status of JobId nn if it is running.
   The Storage daemon is contacted and requested to print a current status of the job as well.
   <span style="color: #3366ff;">status</span> - The console program will prompt you to select a daemon
   type, then will request the daemon's status.
+  <span style="color: #3366ff;">show client status</span> - Show the status of clients.
+  <span style="color: #3366ff;">show dir status</span> -
+  <span style="color: #3366ff;">show filesets</span> -
+  <span style="color: #3366ff;">show storage</span> -
   <span style="color: #3366ff;">unmount storage=storage-name</span> - Unmounts the drive associated
   with the storage device with the name storage-name if the drive is not currently being used. This
   command is used if you wish Bacula to free the drive so that you can use it to label a tape.
@@ -477,25 +486,35 @@ Eject the tape.
 
 
 
-<pre><code>Troubleshooting
-Erase a label on the tape   &lt;span style=&quot;color: #3366ff;&quot;&gt;mt rewind &amp;&amp; mt weof &amp;&amp; mt rewind&lt;/span&gt;
+Troubleshooting
+Erase a label on the tape   <span style="color: #3366ff;">mt rewind && mt weof && mt rewind</span>
 
 Tape drive full and could not be written to:
 Solution was to use bconsole to unmount, then eject the tape from the commandline, then insert
 Tape-0004 and mount from bconsole.
-27-May 08:00 bacula-sd JobId 219: Warning: Director wanted Volume &quot;Tape-0004&quot;.
-    Current Volume &quot;Tape-0003&quot; not acceptable because:
-    1998 Volume &quot;Tape-0003&quot; catalog status is Error, but should be Append, Purged or Recycle.
+27-May 08:00 bacula-sd JobId 219: Warning: Director wanted Volume "Tape-0004".
+    Current Volume "Tape-0003" not acceptable because:
+    1998 Volume "Tape-0003" catalog status is Error, but should be Append, Purged or Recycle.
 
-    I think the command &quot;mount storage=LTO-4_SD&quot; would have worked also but I am not sure
+    I think the command "mount storage=LTO-4_SD" would have worked also but I am not sure
     how I would have ejected the full tape out.
-</code></pre>
 
 </pre>
 <hr />
 <p>Source for some of the data <a href="https://workaround.org/bacula-cheatsheet/">here:</a></p>
 <hr />
 <p><br /> https://www.bacula-web.org/docs/install/selinux/</p>
+<p>For Fedora users running SELinux, and using a local path to backup or restore, you will
+have to set the correct SELinux context label:
+To see the current context label for a directory that you plan to use type:<br />
+    <span style="color: #3366ff;">ls -alZ /Full/Path</span></p>
+<p>Delete the current context (can use double-quotes in the full path section):<br />
+    <span style="color: #3366ff;">semanage fcontext -d -t Old_Context_Type '/Full/Path(/.*)?'</span></p>
+<p>Add a new bacula friendly context (can use double-quotes in the full path section):<br />
+<span style="color: #3366ff;">
+semanage fcontext -a -t bacula_store_t '/Full/Path(/.*)?'<br />
+restorecon -R -v /Full/Path</span></p>
+<p>Make sure bacula has ownership of the path <span style="color: #3366ff;">chown -R bacula:bacula /Full/Path</span></p>
               
             </div>
           </div><footer>

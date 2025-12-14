@@ -68,6 +68,10 @@
                 </li>
               </ul>
               <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../cockpit/">Cockpit</a>
+                </li>
+              </ul>
+              <ul>
                 <li class="toctree-l1"><a class="reference internal" href="../exiftool/">Exiftool</a>
                 </li>
               </ul>
@@ -196,7 +200,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div class="section" itemprop="articleBody">
               
-                <p><a href="https://www.server-world.info/en/note?os=CentOS_7&amp;p=selinux&amp;f=7">Source: </a></p>
+                <p><a href="https://www.server-world.info/en/note?os=CentOS_7&amp;p=selinux&amp;f=7">Source: </a>
+<a href="https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/7/html/selinux_users_and_administrators_guide">Source: </a></p>
 <h3 id="places-to-search-for-avc-messages">Places to search for AVC messages:</h3>
 <p>Messages via Rsyslog are generated with "kern" facility. CentOS default Rsyslog setting is written as "*.info;xxx /var/log/messages", so AVC Denial Log is recorded to /var/log/messages.</p>
 <pre><code>    grep &quot;avc: .denied&quot; /var/log/messages
@@ -211,7 +216,12 @@
 <pre><code>    aureport --avc --summary
 </code></pre>
 <p>STAT command to show SE_Linux status:</p>
-<pre><code>stat -c &quot;%a %n %C&quot; *
+<pre><code>    stat -c &quot;%a %n %C&quot; *
+</code></pre>
+<p>View the available types that can be used with SELinux:
+https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/7/html/selinux_users_and_administrators_guide/sect-managing_confined_services-the_apache_http_server-types</p>
+<pre><code>    First install: dnf -y install setools-console
+    Then run: seinfo -t
 </code></pre>
 <p>Allow apache to receive files to an uploads folder/directory:</p>
 <pre><code>sudo chown apache:apache -R /uploads
@@ -270,6 +280,28 @@ You must check in the SELinux if port 80 is managed in. You can check it by typi
 </code></pre>
 <pre><code>        service httpd start
 </code></pre>
+<pre><code>Webmin vs Usermin (minisrv.pid)
+journalctl -t setroubleshoot --since=09:54 &gt; x.txt &lt;-- showed a miniserv.pid denial issue.
+You can specify a date and time for journalctl: journalctl -t setroubleshoot --since=&quot;2025-12-04 10:55:00&quot;
+https://forum.virtualmin.com/t/selinux-issue-with-miniserv-pid-on-redhat-8/116597
+chcon --recursive --reference=/var/webmin /var/usermin
+</code></pre>
+<p>Testing various software updates to my RedHat 8 servers and came across a new issue.</p>
+<p>I realize its my own headache, but my agency really likes SELinux and we run it in enforcing mode as much as we can :slight_smile:</p>
+<p>My template system I use to clone VirtualMin servers has for a long time had /var/usermin set to the SELinux context of var_t while the corresponding directory /var/webmin has the context of var_log_t (as well as all the files in each directory). This never caused me any issues (not sure I even noticed) until today when I applied a bunch of RedHat updates along with updating webmin and usermin and virtualmin; now there is an issue with the miniserv.pid file used by usermin.</p>
+<p>Note again this was not an issue last week or last month – and is not an issue with the similar miniserv.pid file used by webmin. In researching this, I came across an actual webmin rule distributed by RedHat/Centos in the SELinux policies targeting /var/webmin !! I was very surprised and excited to see that as I did not know it was there.</p>
+<p>Sadly there is not a similar context rule for /var/usermin :frowning:</p>
+<p>so … for now I just relabeled /var/usermin to match /var/webmin with</p>
+<p>chcon --type=var_log_t --recursive /var/usermin</p>
+<p>for completeness I should post another way to adjust it (assuming /var/webmin is correct):</p>
+<p>chcon --recursive --reference=/var/webmin /var/usermin</p>
+<p>of course to make things ‘stick’, I really should create a local policy (and apply it), to mimic the policy already in place for /var/webmin with</p>
+<p>semanage fcontext --add --type=var_log_t “/var/usermin(/.*)?”
+restorecon -R /var/usermin</p>
+<p>OR … as today’s issue is about just the PID file, I wonder if a redesign is in order?? That is, have the PID file stored in /var/run, or a subdirectory such as /var/run/webmin and /var/run/usermin ???</p>
+<p>But that could be much more work; since /var/webmin is set to var_log_t already, /var/usermin I believe should match it :slight_smile:</p>
+<p>As this took me some time to diagnose, I wanted to share in case it can help others !!</p>
+<p>Verne</p>
               
             </div>
           </div><footer>

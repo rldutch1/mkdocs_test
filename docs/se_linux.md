@@ -1,4 +1,5 @@
 [Source: ](https://www.server-world.info/en/note?os=CentOS_7&p=selinux&f=7)
+[Source: ](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/7/html/selinux_users_and_administrators_guide)
 
 ###Places to search for AVC messages:
 Messages via Rsyslog are generated with "kern" facility. CentOS default Rsyslog setting is written as "*.info;xxx /var/log/messages", so AVC Denial Log is recorded to /var/log/messages.
@@ -28,7 +29,14 @@ For Messages via Auditd, it's possible to show summary reports with aureport com
 STAT command to show SE_Linux status:
 
 ```
-stat -c "%a %n %C" *
+	stat -c "%a %n %C" *
+```
+
+View the available types that can be used with SELinux:
+https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/7/html/selinux_users_and_administrators_guide/sect-managing_confined_services-the_apache_http_server-types
+```
+	First install: dnf -y install setools-console
+	Then run: seinfo -t
 ```
 
 Allow apache to receive files to an uploads folder/directory:
@@ -104,3 +112,41 @@ If you need to add the required port, just type:
 ```
 		service httpd start
 ```
+
+```
+Webmin vs Usermin (minisrv.pid)
+journalctl -t setroubleshoot --since=09:54 > x.txt <-- showed a miniserv.pid denial issue.
+You can specify a date and time for journalctl: journalctl -t setroubleshoot --since="2025-12-04 10:55:00"
+https://forum.virtualmin.com/t/selinux-issue-with-miniserv-pid-on-redhat-8/116597
+chcon --recursive --reference=/var/webmin /var/usermin
+```
+Testing various software updates to my RedHat 8 servers and came across a new issue.
+
+I realize its my own headache, but my agency really likes SELinux and we run it in enforcing mode as much as we can :slight_smile:
+
+My template system I use to clone VirtualMin servers has for a long time had /var/usermin set to the SELinux context of var_t while the corresponding directory /var/webmin has the context of var_log_t (as well as all the files in each directory). This never caused me any issues (not sure I even noticed) until today when I applied a bunch of RedHat updates along with updating webmin and usermin and virtualmin; now there is an issue with the miniserv.pid file used by usermin.
+
+Note again this was not an issue last week or last month – and is not an issue with the similar miniserv.pid file used by webmin. In researching this, I came across an actual webmin rule distributed by RedHat/Centos in the SELinux policies targeting /var/webmin !! I was very surprised and excited to see that as I did not know it was there.
+
+Sadly there is not a similar context rule for /var/usermin :frowning:
+
+so … for now I just relabeled /var/usermin to match /var/webmin with
+
+chcon --type=var_log_t --recursive /var/usermin
+
+for completeness I should post another way to adjust it (assuming /var/webmin is correct):
+
+chcon --recursive --reference=/var/webmin /var/usermin
+
+of course to make things ‘stick’, I really should create a local policy (and apply it), to mimic the policy already in place for /var/webmin with
+
+semanage fcontext --add --type=var_log_t “/var/usermin(/.*)?”
+restorecon -R /var/usermin
+
+OR … as today’s issue is about just the PID file, I wonder if a redesign is in order?? That is, have the PID file stored in /var/run, or a subdirectory such as /var/run/webmin and /var/run/usermin ???
+
+But that could be much more work; since /var/webmin is set to var_log_t already, /var/usermin I believe should match it :slight_smile:
+
+As this took me some time to diagnose, I wanted to share in case it can help others !!
+
+Verne
