@@ -146,6 +146,8 @@
     </li>
     <li class="toctree-l3"><a class="reference internal" href="#ignore-the-case-sensitivity-when-replacing-a-word-replace-all-old-or-old">Ignore the case-sensitivity when replacing a word replace all (Old or old).</a>
     </li>
+    <li class="toctree-l3"><a class="reference internal" href="#from-within-the-vi-editor-you-can-replace-a-character-semi-colon-in-this-example-with-a-literal-carriage-return-character-using-ctrlv-followed-by-enter-or-ctrlm">From within the VI editor you can replace a character (semi-colon in this example) with a literal carriage return character using Ctrl+V followed by Enter (or Ctrl+M):</a>
+    </li>
         </ul>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#top">Top</a>
@@ -329,6 +331,9 @@
 </code></pre>
 <h6 id="ignore-the-case-sensitivity-when-replacing-a-word-replace-all-old-or-old">Ignore the case-sensitivity when replacing a word replace all (Old or old).</h6>
 <pre><code>- sed 's/old/new/i' somefile.txt
+</code></pre>
+<h6 id="from-within-the-vi-editor-you-can-replace-a-character-semi-colon-in-this-example-with-a-literal-carriage-return-character-using-ctrlv-followed-by-enter-or-ctrlm">From within the VI editor you can replace a character (semi-colon in this example) with a  literal carriage return character using Ctrl+V followed by Enter (or Ctrl+M):</h6>
+<pre><code>- :%s/;/^M/g
 </code></pre>
 <h4 id="top">Top</h4>
 <h6 id="to-display-only-the-processes-that-belong-to-a-particular-user-use-u-option-the-following-will-show-only-the-top-processes-that-belongs-to-oracle-user">To display only the processes that belong to a particular user use -u option. The following will show only the top processes that belongs to oracle user.</h6>

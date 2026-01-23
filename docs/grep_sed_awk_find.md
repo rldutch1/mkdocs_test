@@ -61,6 +61,9 @@
 ###### Ignore the case-sensitivity when replacing a word replace all (Old or old).
 	- sed 's/old/new/i' somefile.txt
 
+###### From within the VI editor you can replace a character (semi-colon in this example) with a  literal carriage return character using Ctrl+V followed by Enter (or Ctrl+M):
+	- :%s/;/^M/g
+
 #### Top
 ###### To display only the processes that belong to a particular user use -u option. The following will show only the top processes that belongs to oracle user.
 	- top -u oracle

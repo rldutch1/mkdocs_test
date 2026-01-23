@@ -32,6 +32,24 @@ STAT command to show SE_Linux status:
 	stat -c "%a %n %C" *
 ```
 
+To view what actions SELinux denies, enter the following command as root:
+
+```
+	ausearch -m AVC,USER_AVC,SELINUX_ERR,USER_SELINUX_ERR -ts today
+```
+
+Alternatively, with the setroubleshoot-server package installed, enter:
+
+```
+	grep "SELinux is preventing" /var/log/messages
+```
+
+If SELinux is active and the Audit daemon (auditd) is not running on your system, then search for certain SELinux messages in the output of the dmesg command:
+
+```
+	dmesg | grep -i -e type=1300 -e type=1400
+```
+
 View the available types that can be used with SELinux:
 https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/7/html/selinux_users_and_administrators_guide/sect-managing_confined_services-the_apache_http_server-types
 ```
@@ -108,7 +126,7 @@ If you need to add the required port, just type:
 		getsebool httpd_can_network_connect
 		getsebool httpd_can_network_connect_db
 ```
-		Up the httpd service # 
+		Up the httpd service #
 ```
 		service httpd start
 ```

@@ -50,6 +50,16 @@
               <ul class="current">
                 <li class="toctree-l1 current"><a class="reference internal current" href="#">Bacula</a>
     <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#bacula-services">Bacula Services:</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#selinux-and-fedora">SELinux and Fedora:</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#i-added-a-thumbdrive-as-bacula-storage-bacula-sdconf">I added a ThumbDrive as bacula storage (bacula-sd.conf):</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#as-a-test-i-added-a-job-that-backs-up-the-printer-drivers-in-optbrother-bacula-dirconf">As a test, I added a job that backs up the printer drivers in /opt/brother (bacula-dir.conf):</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#run-commands-as-bacula-to-see-if-things-are-working">Run commands as bacula to see if things are working:</a>
+    </li>
     </ul>
                 </li>
               </ul>
@@ -200,16 +210,12 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div class="section" itemprop="articleBody">
               
-                <h1 id="heading">Heading</h1>
-<pre>
-----------------:
-    <span style="color: #3366ff;">
-    -------------
-    </span>
-
-Bacula Services:
-<span style="color: #3366ff;">
-    service bacula-dir start
+                <h1 id="bacula">Bacula</h1>
+<pre><code>&lt;span style="color: #3366ff;"&gt;
+&lt;/span&gt;
+</code></pre>
+<h4 id="bacula-services">Bacula Services:</h4>
+<pre><code>    service bacula-dir start
     service bacula-fd start
     service bacula-sd start
 
@@ -221,9 +227,19 @@ Bacula Services:
     systemctl status bacula-fd
     systemctl status bacula-sd
 
-    ss -lt <-(Should show all three services listening)
-</span>
-</pre>
+    ss -lt &lt;-(Should show all three services listening)
+</code></pre>
+<p>I wrote a restart_bacsrvcs.sh script that restarts all bacula services:</p>
+<pre><code>echo "Restarting bacula-fd";
+systemctl restart bacula-fd;
+echo "Restarting bacula-sd";
+systemctl restart bacula-sd;
+echo "Restarting bacula-dir";
+systemctl restart bacula-dir;
+echo "Waiting 5 seconds to display the bacula services."
+ping -c 5 localhost &gt; /dev/null
+ss -lt |grep bacula
+</code></pre>
 <pre>
 Bacula Cheat Sheet
 Bacula is a nifty backup software that is network-capable and stores data in <br />the database for faster retrieval in case you need a certain file back. <br />As a big fan of cheat sheets I created this cheat sheet.
@@ -423,21 +439,21 @@ Using Full + Differential + Incremental backups saves most space while still kee
 losing data low. A restore requires the Incremental backups back up to the last Differential
 backup + the last Full backup. This could look like:
 
-Full
+<b>Full</b>
 Differential
 Incremental
 Incremental
 Incremental
 Incremental
-Differential
+<b>Differential</b>
 Incremental
 Incremental
-Incremental <–
+<b>Incremental <–</b>
 Incremental
 Full
 …
 To restore the highlighted Incremental backup you would need the previous Differential and Full
-backups printed in bold letters.
+backups printed in <b>bold letters</b>.
 
 Which mode to use depends on the type of data to backup. Database directories usually change in
 its entirety so a Full backup is the best solution. File servers with millions of files gain some
@@ -504,6 +520,7 @@ Tape-0004 and mount from bconsole.
 <p>Source for some of the data <a href="https://workaround.org/bacula-cheatsheet/">here:</a></p>
 <hr />
 <p><br /> https://www.bacula-web.org/docs/install/selinux/</p>
+<h4 id="selinux-and-fedora">SELinux and Fedora:</h4>
 <p>For Fedora users running SELinux, and using a local path to backup or restore, you will
 have to set the correct SELinux context label:
 To see the current context label for a directory that you plan to use type:<br />
@@ -515,6 +532,50 @@ To see the current context label for a directory that you plan to use type:<br /
 semanage fcontext -a -t bacula_store_t '/Full/Path(/.*)?'<br />
 restorecon -R -v /Full/Path</span></p>
 <p>Make sure bacula has ownership of the path <span style="color: #3366ff;">chown -R bacula:bacula /Full/Path</span></p>
+<h4 id="i-added-a-thumbdrive-as-bacula-storage-bacula-sdconf">I added a ThumbDrive as bacula storage (bacula-sd.conf):</h4>
+<pre><code>  Device {
+    Name = USB_Thumbdrive
+    Archive Device = /mnt/bacula_usb/bacula_backups
+    Media Type = File1
+    LabelMedia = yes
+    Random Access = yes
+    AutomaticMount = yes
+    RemovableMedia = yes
+    AlwaysOpen = no
+  }
+</code></pre>
+<p><br /></p>
+<h4 id="as-a-test-i-added-a-job-that-backs-up-the-printer-drivers-in-optbrother-bacula-dirconf">As a test, I added a job that backs up the printer drivers in /opt/brother (bacula-dir.conf):<br /></h4>
+<pre><code>  Job {
+    Name = HPDesktopBrotherPrinter
+    Type = Backup
+    Level = Full
+    Client = hpdesktop
+    FileSet = "HPDesktop Brother Printer"
+    Schedule = WeeklyCycle
+    Pool = File
+    Messages = Standard
+    Storage = USB_Thumbdrive_SD
+  }
+
+  Storage {
+    Name = USB_Thumbdrive_SD
+    Password = bacula911
+    Address = hpdesktop.lan
+    SDPort = 9103
+    Device = USB_Thumbdrive
+    Media Type = File1
+    Maximum Concurrent Jobs = 20
+  }
+</code></pre>
+<p><br />
+The USB thumb drive is formatted as ext4 and the folder bacula_backups is owned by bacula. <br />
+I also changed the selinux context for bacula_backups to bacula_store_t.<br /></p>
+<p>Bacula was not able to mount the USB thumbdrive until I added it to the fstab file and rebooted.
+        <span style="color: #3366ff;">UUID=1b301765-6947-414d-8c60-8b0bf5b214b5 /mnt/bacula_usb   ext4    defaults,nofail 0 2</span></p>
+<h4 id="run-commands-as-bacula-to-see-if-things-are-working">Run commands as bacula to see if things are working:</h4>
+<pre><code>    su -m bacula -c "touch /mnt/xyz/testbacula.txt"
+</code></pre>
               
             </div>
           </div><footer>

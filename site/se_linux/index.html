@@ -218,6 +218,15 @@
 <p>STAT command to show SE_Linux status:</p>
 <pre><code>    stat -c &quot;%a %n %C&quot; *
 </code></pre>
+<p>To view what actions SELinux denies, enter the following command as root:</p>
+<pre><code>    ausearch -m AVC,USER_AVC,SELINUX_ERR,USER_SELINUX_ERR -ts today
+</code></pre>
+<p>Alternatively, with the setroubleshoot-server package installed, enter:</p>
+<pre><code>    grep &quot;SELinux is preventing&quot; /var/log/messages
+</code></pre>
+<p>If SELinux is active and the Audit daemon (auditd) is not running on your system, then search for certain SELinux messages in the output of the dmesg command:</p>
+<pre><code>    dmesg | grep -i -e type=1300 -e type=1400
+</code></pre>
 <p>View the available types that can be used with SELinux:
 https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/7/html/selinux_users_and_administrators_guide/sect-managing_confined_services-the_apache_http_server-types</p>
 <pre><code>    First install: dnf -y install setools-console

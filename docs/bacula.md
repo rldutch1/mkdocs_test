@@ -1,27 +1,37 @@
-#Heading
-<pre>
-----------------:
+#Bacula
+
+
 	<span style="color: #3366ff;">
-	-------------
 	</span>
 
-Bacula Services:
-<span style="color: #3366ff;">
-	service bacula-dir start
-	service bacula-fd start
-	service bacula-sd start
+#### Bacula Services:
 
-	systemctl enable bacula-dir
-	systemctl enable bacula-fd
-	systemctl enable bacula-sd
+      	service bacula-dir start
+      	service bacula-fd start
+      	service bacula-sd start
 
-	systemctl status bacula-dir
-	systemctl status bacula-fd
-	systemctl status bacula-sd
+      	systemctl enable bacula-dir
+      	systemctl enable bacula-fd
+      	systemctl enable bacula-sd
 
-	ss -lt <-(Should show all three services listening)
-</span>
-</pre>
+      	systemctl status bacula-dir
+      	systemctl status bacula-fd
+      	systemctl status bacula-sd
+
+      	ss -lt <-(Should show all three services listening)
+
+I wrote a restart_bacsrvcs.sh script that restarts all bacula services:
+
+    echo "Restarting bacula-fd";
+    systemctl restart bacula-fd;
+    echo "Restarting bacula-sd";
+    systemctl restart bacula-sd;
+    echo "Restarting bacula-dir";
+    systemctl restart bacula-dir;
+    echo "Waiting 5 seconds to display the bacula services."
+    ping -c 5 localhost > /dev/null
+    ss -lt |grep bacula
+
 <pre>
 Bacula Cheat Sheet
 Bacula is a nifty backup software that is network-capable and stores data in <br />the database for faster retrieval in case you need a certain file back. <br />As a big fan of cheat sheets I created this cheat sheet.
@@ -221,21 +231,21 @@ Using Full + Differential + Incremental backups saves most space while still kee
 losing data low. A restore requires the Incremental backups back up to the last Differential
 backup + the last Full backup. This could look like:
 
-Full
+<b>Full</b>
 Differential
 Incremental
 Incremental
 Incremental
 Incremental
-Differential
+<b>Differential</b>
 Incremental
 Incremental
-Incremental <–
+<b>Incremental <–</b>
 Incremental
 Full
 …
 To restore the highlighted Incremental backup you would need the previous Differential and Full
-backups printed in bold letters.
+backups printed in <b>bold letters</b>.
 
 Which mode to use depends on the type of data to backup. Database directories usually change in
 its entirety so a Full backup is the best solution. File servers with millions of files gain some
@@ -303,6 +313,7 @@ Source for some of the data [here:](https://workaround.org/bacula-cheatsheet/)
 <hr />
 <br /> https://www.bacula-web.org/docs/install/selinux/
 
+#### SELinux and Fedora:
 For Fedora users running SELinux, and using a local path to backup or restore, you will
 have to set the correct SELinux context label:
 To see the current context label for a directory that you plan to use type:<br />
@@ -318,3 +329,46 @@ restorecon -R -v /Full/Path</span>
 
 Make sure bacula has ownership of the path <span style="color: #3366ff;">chown -R bacula:bacula /Full/Path</span>
 
+#### I added a ThumbDrive as bacula storage (bacula-sd.conf):
+      Device {
+        Name = USB_Thumbdrive
+        Archive Device = /mnt/bacula_usb/bacula_backups
+        Media Type = File1
+        LabelMedia = yes
+        Random Access = yes
+        AutomaticMount = yes
+        RemovableMedia = yes
+        AlwaysOpen = no
+      }
+<br />
+#### As a test, I added a job that backs up the printer drivers in /opt/brother (bacula-dir.conf):<br />
+      Job {
+        Name = HPDesktopBrotherPrinter
+        Type = Backup
+        Level = Full
+        Client = hpdesktop
+        FileSet = "HPDesktop Brother Printer"
+        Schedule = WeeklyCycle
+        Pool = File
+        Messages = Standard
+        Storage = USB_Thumbdrive_SD
+      }
+
+      Storage {
+        Name = USB_Thumbdrive_SD
+        Password = bacula911
+        Address = hpdesktop.lan
+        SDPort = 9103
+        Device = USB_Thumbdrive
+        Media Type = File1
+        Maximum Concurrent Jobs = 20
+      }
+<br />
+The USB thumb drive is formatted as ext4 and the folder bacula_backups is owned by bacula. <br />
+I also changed the selinux context for bacula_backups to bacula_store_t.<br />
+
+Bacula was not able to mount the USB thumbdrive until I added it to the fstab file and rebooted.
+		<span style="color: #3366ff;">UUID=1b301765-6947-414d-8c60-8b0bf5b214b5 /mnt/bacula_usb	  ext4	  defaults,nofail 0 2</span>
+
+#### Run commands as bacula to see if things are working:
+		su -m bacula -c "touch /mnt/xyz/testbacula.txt"
